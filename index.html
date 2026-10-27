@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PEC2 · Tres técnicas de visualización</title>
+<link rel="stylesheet" href="css/estilo.css">
+<style>
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 18px; }
+.cards a { display: block; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: border-color .15s, transform .15s; }
+.cards a:hover { border-color: var(--ink); transform: translateY(-2px); }
+.cards .n { font-size: 13px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+.cards h2 { font-size: 20px; margin: 4px 0 6px; }
+.cards p { margin: 0; color: var(--ink-2); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Máster Universitario en Ciencia de Datos · UOC · Visualización de datos · PEC2</p>
+  <h1>Tres técnicas, tres conjuntos de datos abiertos</h1>
+  <p class="sub">Josué Villacres Zumaeta. Cada técnica se ha emparejado con datos que encajan con su esencia, una composición que cambia entre categorías, muchas series que fluyen en el tiempo y una distribución que se compara entre grupos.</p>
+  <div class="cards">
+    <a href="barras_apiladas.html"><span class="n">Técnica 1 · Grupo I</span><h2>Barras apiladas</h2><p>Generación eléctrica de España por fuente, 2000–2025. Fuente: Our World in Data (Ember).</p></a>
+    <a href="streamgraph.html"><span class="n">Técnica 2 · Grupo II</span><h2>Streamgraph</h2><p>Turistas internacionales llegados a España cada mes según su país de residencia, 2016–2026. Fuente: INE (FRONTUR).</p></a>
+    <a href="violin.html"><span class="n">Técnica 3 · Grupo III</span><h2>Violin plot</h2><p>Temperatura máxima diaria de verano en Madrid-Retiro por décadas, 1961–2026. Fuente: NOAA GHCN-Daily.</p></a>
+  </div>
+</div>
+</body>
+</html>

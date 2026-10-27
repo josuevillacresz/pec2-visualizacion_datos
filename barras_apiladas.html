@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barras apiladas · Electricidad en España</title>
+<link rel="stylesheet" href="css/estilo.css">
+<script src="js/d3.v7.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">PEC2 · Visualización de datos · Técnica 1 de 3: <b>gráfico de barras apiladas</b> · <a href="index.html">inicio</a></p>
+  <h1>España genera la misma electricidad que en 2005, pero el carbón ha desaparecido y la solar ya es la primera fuente</h1>
+  <p class="sub">Generación eléctrica anual por fuente, 2000–2025, en teravatios hora (TWh). Cada barra es un año; cada segmento, una fuente. Las fósiles van abajo, las renovables arriba.</p>
+
+  <div class="card">
+    <div class="controls">
+      <span>Mostrar:</span>
+      <span class="seg" role="group" aria-label="Escala">
+        <button id="btnAbs" aria-pressed="true">TWh (barras apiladas simples)</button>
+        <button id="btnPct" aria-pressed="false">% del total (barras apiladas al 100 %)</button>
+      </span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <svg id="chart" role="img" aria-label="Gráfico de barras apiladas de la generación eléctrica de España por fuente, 2000-2025"></svg>
+  </div>
+
+  <div class="howto">
+    <div>La altura total de cada barra es la electricidad generada ese año; cada color, la parte que aporta una fuente.</div>
+    <div>Pase el ratón por una barra para ver todas sus cifras. Haz clic en la leyenda para resaltar una fuente. Cambia a «% del total» para comparar el reparto entre años.</div>
+    <div>El gris (carbón) se desvanece a partir de 2019 mientras crecen el amarillo (solar) y el verde azulado (eólica). El total apenas cambia desde 2005.</div>
+  </div>
+
+  <details><summary>Ver los datos en tabla</summary><div id="tabla"></div></details>
+
+  <footer>
+    <b>Fuente:</b> Our World in Data, <a href="https://github.com/owid/energy-data">energy-data</a> (a partir de Ember y Energy Institute Statistical Review of World Energy), licencia CC BY 4.0. «Bioenergía y otras» suma bioenergía y otras renovables. Datos: <a href="data/electricidad_espana_2000_2025.csv">electricidad_espana_2000_2025.csv</a>.
+    <div class="nav"><a href="index.html">← Inicio</a><a href="streamgraph.html">Técnica 2: streamgraph →</a></div>
+  </footer>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const DATA = [{"anio":2000,"Carbón":79.09,"Gas natural":20.18,"Petróleo":24.95,"Nuclear":62.21,"Hidráulica":28.26,"Eólica":4.73,"Solar":0.01,"Bioenergía y otras":1.49},{"anio":2001,"Carbón":70.27,"Gas natural":23.36,"Petróleo":26.43,"Nuclear":63.71,"Hidráulica":40.89,"Eólica":6.76,"Solar":0.02,"Bioenergía y otras":1.63},{"anio":2002,"Carbón":81.18,"Gas natural":32.39,"Petróleo":30.15,"Nuclear":63.02,"Hidráulica":21.22,"Eólica":9.34,"Solar":0.02,"Bioenergía y otras":2.59},{"anio":2003,"Carbón":74.73,"Gas natural":39.37,"Petróleo":25.57,"Nuclear":61.88,"Hidráulica":40.48,"Eólica":12.07,"Solar":0.02,"Bioenergía y otras":3.18},{"anio":2004,"Carbón":79.1,"Gas natural":55.46,"Petróleo":28.31,"Nuclear":63.61,"Hidráulica":31.08,"Eólica":15.7,"Solar":0.02,"Bioenergía y otras":3.33},{"anio":2005,"Carbón":79.06,"Gas natural":79.01,"Petróleo":31.58,"Nuclear":57.54,"Hidráulica":18.39,"Eólica":21.18,"Solar":0.05,"Bioenergía y otras":2.65},{"anio":2006,"Carbón":66.74,"Gas natural":90.57,"Petróleo":26.0,"Nuclear":60.13,"Hidráulica":25.96,"Eólica":23.3,"Solar":0.12,"Bioenergía y otras":2.77},{"anio":2007,"Carbón":72.8,"Gas natural":94.8,"Petróleo":20.86,"Nuclear":55.1,"Hidráulica":27.31,"Eólica":27.57,"Solar":0.52,"Bioenergía y otras":2.9},{"anio":2008,"Carbón":48.71,"Gas natural":120.8,"Petróleo":19.16,"Nuclear":58.97,"Hidráulica":23.36,"Eólica":32.95,"Solar":2.58,"Bioenergía y otras":3.26},{"anio":2009,"Carbón":35.91,"Gas natural":107.75,"Petróleo":20.22,"Nuclear":52.76,"Hidráulica":26.41,"Eólica":38.12,"Solar":6.06,"Bioenergía y otras":3.49},{"anio":2010,"Carbón":25.33,"Gas natural":94.85,"Petróleo":17.86,"Nuclear":61.99,"Hidráulica":42.3,"Eólica":44.27,"Solar":7.19,"Bioenergía y otras":4.01},{"anio":2011,"Carbón":43.98,"Gas natural":85.51,"Petróleo":16.8,"Nuclear":57.72,"Hidráulica":30.6,"Eólica":42.92,"Solar":9.4,"Bioenergía y otras":4.61},{"anio":2012,"Carbón":55.07,"Gas natural":73.31,"Petróleo":17.13,"Nuclear":61.47,"Hidráulica":20.55,"Eólica":49.47,"Solar":11.97,"Bioenergía y otras":4.98},{"anio":2013,"Carbón":39.94,"Gas natural":57.54,"Petróleo":15.84,"Nuclear":56.73,"Hidráulica":36.87,"Eólica":55.64,"Solar":13.1,"Bioenergía y otras":5.8},{"anio":2014,"Carbón":43.81,"Gas natural":47.27,"Petróleo":15.79,"Nuclear":57.31,"Hidráulica":39.17,"Eólica":52.01,"Solar":13.67,"Bioenergía y otras":5.41},{"anio":2015,"Carbón":51.37,"Gas natural":52.5,"Petróleo":19.02,"Nuclear":57.2,"Hidráulica":28.14,"Eólica":49.32,"Solar":13.86,"Bioenergía y otras":5.76},{"anio":2016,"Carbón":36.43,"Gas natural":52.83,"Petróleo":18.18,"Nuclear":58.63,"Hidráulica":36.4,"Eólica":48.9,"Solar":13.64,"Bioenergía y otras":5.69},{"anio":2017,"Carbón":45.13,"Gas natural":64.04,"Petróleo":17.24,"Nuclear":58.04,"Hidráulica":18.32,"Eólica":49.13,"Solar":14.4,"Bioenergía y otras":6.08},{"anio":2018,"Carbón":37.34,"Gas natural":58.0,"Petróleo":16.42,"Nuclear":55.77,"Hidráulica":34.33,"Eólica":50.89,"Solar":12.74,"Bioenergía y otras":5.91},{"anio":2019,"Carbón":12.86,"Gas natural":83.71,"Petróleo":14.61,"Nuclear":58.35,"Hidráulica":24.65,"Eólica":55.65,"Solar":15.1,"Bioenergía y otras":5.59},{"anio":2020,"Carbón":5.52,"Gas natural":69.74,"Petróleo":12.12,"Nuclear":58.3,"Hidráulica":30.51,"Eólica":56.44,"Solar":20.67,"Bioenergía y otras":6.17},{"anio":2021,"Carbón":4.86,"Gas natural":71.5,"Petróleo":12.08,"Nuclear":56.56,"Hidráulica":29.63,"Eólica":62.06,"Solar":27.1,"Bioenergía y otras":6.96},{"anio":2022,"Carbón":7.86,"Gas natural":86.1,"Petróleo":11.69,"Nuclear":58.59,"Hidráulica":17.59,"Eólica":62.78,"Solar":35.72,"Bioenergía y otras":6.82},{"anio":2023,"Carbón":3.62,"Gas natural":64.36,"Petróleo":10.48,"Nuclear":56.87,"Hidráulica":25.0,"Eólica":64.28,"Solar":48.59,"Bioenergía y otras":5.91},{"anio":2024,"Carbón":2.58,"Gas natural":52.34,"Petróleo":10.41,"Nuclear":54.53,"Hidráulica":34.41,"Eólica":62.2,"Solar":58.29,"Bioenergía y otras":6.18},{"anio":2025,"Carbón":0.92,"Gas natural":62.06,"Petróleo":10.03,"Nuclear":54.07,"Hidráulica":32.74,"Eólica":58.76,"Solar":62.9,"Bioenergía y otras":6.41}];
+const KEYS = ["Carbón","Gas natural","Petróleo","Nuclear","Hidráulica","Eólica","Solar","Bioenergía y otras"];
+const COLORS = {"Carbón":"#6e6d68","Gas natural":"#eb6834","Petróleo":"#9b4f2a","Nuclear":"#4a3aa7","Hidráulica":"#2a78d6","Eólica":"#1baf7a","Solar":"#eda100","Bioenergía y otras":"#008300"};
+const fmt = d3.format(",.1f"), fmtES = v => fmt(v).replace(/,/g,"X").replace(/\./g,",").replace(/X/g,".");
+let mode = "abs", focus = null;
+
+const legend = d3.select("#legend");
+KEYS.slice().reverse().forEach(k => {
+  const it = legend.append("span").attr("class","item").attr("data-k",k)
+    .on("click", () => { focus = (focus === k ? null : k); draw(); });
+  it.append("span").attr("class","sw").style("background", COLORS[k]);
+  it.append("span").text(k);
+});
+
+const svg = d3.select("#chart");
+const W = 1040, H = 520, M = {t: 16, r: 120, b: 34, l: 54};
+svg.attr("viewBox", `0 0 ${W} ${H}`);
+const x = d3.scaleBand().domain(DATA.map(d => d.anio)).range([M.l, W - M.r]).paddingInner(0.22).paddingOuter(0.1);
+const y = d3.scaleLinear().range([H - M.b, M.t]);
+const gGrid = svg.append("g").attr("class","grid").attr("transform", `translate(${M.l},0)`);
+const gBars = svg.append("g");
+const gX = svg.append("g").attr("class","axis").attr("transform", `translate(0,${H - M.b})`);
+const gY = svg.append("g").attr("class","axis").attr("transform", `translate(${M.l},0)`);
+const gLab = svg.append("g");
+const yTitle = svg.append("text").attr("class","note").attr("x", M.l).attr("y", M.t - 4);
+const tip = d3.select("#tip");
+
+function series() {
+  const rows = DATA.map(d => {
+    const tot = d3.sum(KEYS, k => d[k]);
+    const r = {anio: d.anio, _tot: tot};
+    KEYS.forEach(k => r[k] = mode === "pct" ? d[k] / tot * 100 : d[k]);
+    return r;
+  });
+  return {rows, stack: d3.stack().keys(KEYS)(rows)};
+}
+
+function draw() {
+  const {rows, stack} = series();
+  y.domain(mode === "pct" ? [0, 100] : [0, 320]).nice();
+  gGrid.call(d3.axisLeft(y).ticks(mode === "pct" ? 5 : 8).tickSize(-(W - M.l - M.r)).tickFormat(""));
+  gY.call(d3.axisLeft(y).ticks(mode === "pct" ? 5 : 8).tickSizeOuter(0).tickFormat(v => mode === "pct" ? v + " %" : d3.format(",")(v).replace(/,/g,".")));
+  gY.select(".domain").remove();
+  gX.call(d3.axisBottom(x).tickValues(x.domain().filter(a => a % 5 === 0 || a === 2025)).tickSizeOuter(0));
+  yTitle.text(mode === "pct" ? "% de la generación anual" : "TWh generados al año");
+
+  const layer = gBars.selectAll("g.layer").data(stack, d => d.key)
+    .join("g").attr("class","layer").attr("fill", d => COLORS[d.key]);
+  layer.transition().duration(250).attr("opacity", d => focus && d.key !== focus ? 0.18 : 1);
+  layer.selectAll("rect").data(d => d.map(v => ({v, key: d.key})), d => d.v.data.anio)
+    .join("rect")
+      .attr("x", d => x(d.v.data.anio)).attr("width", x.bandwidth())
+      .on("mousemove", (ev, d) => showTip(ev, d.v.data))
+      .on("mouseleave", () => tip.style("opacity", 0))
+    .transition().duration(450)
+      .attr("y", d => y(d.v[1]) + 1)
+      .attr("height", d => Math.max(0, y(d.v[0]) - y(d.v[1]) - 1.5));
+
+  const last = rows[rows.length - 1];
+  const lastStack = stack.map(s => ({key: s.key, mid: (s[s.length - 1][0] + s[s.length - 1][1]) / 2, val: last[s.key]}));
+  let ys = lastStack.map(s => ({...s, py: y(s.mid)}));
+  ys.sort((a, b) => b.py - a.py);
+  for (let i = 1; i < ys.length; i++) if (ys[i - 1].py - ys[i].py < 14) ys[i].py = ys[i - 1].py - 14;
+  const lx = x(last.anio) + x.bandwidth() + 8;
+  gLab.selectAll("text").data(ys, d => d.key).join("text")
+    .attr("class","note").attr("x", lx).attr("dy", "0.35em")
+    .attr("opacity", d => focus && d.key !== focus ? 0.3 : 1)
+    .text(d => `${d.key} ${mode === "pct" ? fmtES(d.val) + " %" : ""}`.trim())
+    .transition().duration(450).attr("y", d => d.py);
+
+  d3.selectAll(".legend .item").classed("off", function() { return focus && this.dataset.k !== focus; });
+}
+
+function showTip(ev, row) {
+  const raw = DATA.find(d => d.anio === row.anio), tot = d3.sum(KEYS, k => raw[k]);
+  let h = `<b>${row.anio}</b> · total ${fmtES(tot)} TWh`;
+  KEYS.slice().reverse().forEach(k => {
+    h += `<div class="row"><span><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${COLORS[k]};margin-right:6px"></span>${k}</span><span>${fmtES(raw[k])} TWh · ${fmtES(raw[k] / tot * 100)} %</span></div>`;
+  });
+  tip.html(h).style("opacity", 1)
+    .style("left", Math.min(ev.clientX + 14, window.innerWidth - 300) + "px")
+    .style("top", (ev.clientY + 14) + "px");
+}
+
+d3.select("#btnAbs").on("click", () => { mode = "abs"; d3.select("#btnAbs").attr("aria-pressed", true); d3.select("#btnPct").attr("aria-pressed", false); draw(); });
+d3.select("#btnPct").on("click", () => { mode = "pct"; d3.select("#btnPct").attr("aria-pressed", true); d3.select("#btnAbs").attr("aria-pressed", false); draw(); });
+
+const t = d3.select("#tabla").append("table").attr("class","data");
+t.append("tr").selectAll("th").data(["Año", ...KEYS, "Total"]).join("th").text(d => d);
+DATA.forEach(d => t.append("tr").selectAll("td").data([d.anio, ...KEYS.map(k => fmtES(d[k])), fmtES(d3.sum(KEYS, k => d[k]))]).join("td").text(v => v));
+
+const params = new URLSearchParams(location.search);
+if (params.get("modo") === "pct") { mode = "pct"; d3.select("#btnPct").attr("aria-pressed", true); d3.select("#btnAbs").attr("aria-pressed", false); }
+if (params.get("foco")) focus = params.get("foco");
+draw();
+</script>
+</body>
+</html>
